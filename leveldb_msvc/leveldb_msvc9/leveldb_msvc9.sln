@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "leveldb_msvc9", "leveldb_msvc9\leveldb_msvc9.vcproj", "{8712BED8-752D-466B-8381-46189CBAC61C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3F9E4D43-8D8F-43C9-BFF8-18D9549685A2} = {3F9E4D43-8D8F-43C9-BFF8-18D9549685A2}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "snappy_msvc9", "snappy_msvc9\snappy_msvc9.vcproj", "{3F9E4D43-8D8F-43C9-BFF8-18D9549685A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8712BED8-752D-466B-8381-46189CBAC61C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8712BED8-752D-466B-8381-46189CBAC61C}.Debug|Win32.Build.0 = Debug|Win32
+		{8712BED8-752D-466B-8381-46189CBAC61C}.Release|Win32.ActiveCfg = Release|Win32
+		{8712BED8-752D-466B-8381-46189CBAC61C}.Release|Win32.Build.0 = Release|Win32
+		{3F9E4D43-8D8F-43C9-BFF8-18D9549685A2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3F9E4D43-8D8F-43C9-BFF8-18D9549685A2}.Debug|Win32.Build.0 = Debug|Win32
+		{3F9E4D43-8D8F-43C9-BFF8-18D9549685A2}.Release|Win32.ActiveCfg = Release|Win32
+		{3F9E4D43-8D8F-43C9-BFF8-18D9549685A2}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
