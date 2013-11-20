@@ -1,7 +1,6 @@
 goatpig's LevelDB windows port
 
-The idea behind this port is reduce dependencies on external projects to a maximum, while avoiding all unecessary source modification, 
-in order to allow easy updating and seemless integration in multi-platform projects.
+The idea behind this port is to reduce dependencies on external projects to a maximum, while avoiding all unecessary source modification, in order to allow easy updating and seemless integration in multi-platform projects.
 
 The msvc11 solution cannot yield WinXP compatible binaries. Instead, use the msvc9 solution.
 
