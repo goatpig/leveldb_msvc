@@ -4,6 +4,8 @@ The idea behind this port is to reduce dependencies on external projects to a ma
 
 The msvc11 solution cannot yield WinXP compatible binaries. Instead, use the msvc9 solution.
 
+Update: Now support unicode paths. Feed your paths encoded in UTF8
+
 You can use, distribute and modify all the of the code I've written with no form of obligation towards me. The rest of the code elemnts 
 depend on their respective copyrights.
 
