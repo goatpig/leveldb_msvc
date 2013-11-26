@@ -24,7 +24,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -90,6 +90,8 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>snappy_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -113,7 +115,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\..\snappy;..\..\leveldb;..\..\leveldb_windows_port\win32_posix;..\..\leveldb\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;LEVELDB_PLATFORM_POSIX;LEVELDB_HAVE_MEMORY_BARRIER;NOMINMAX;USE_CONDVAR;SNAPPY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;LEVELDB_PLATFORM_POSIX;LEVELDB_HAVE_MEMORY_BARRIER;NOMINMAX;USE_CONDVAR;NDEBUG;SNAPPY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -130,7 +132,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..\..\snappy;..\..\leveldb;..\..\leveldb_windows_port\win32_posix;..\..\leveldb\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;LEVELDB_PLATFORM_POSIX;LEVELDB_HAVE_MEMORY_BARRIER;NOMINMAX;USE_CONDVAR;SNAPPY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;LEVELDB_PLATFORM_POSIX;LEVELDB_HAVE_MEMORY_BARRIER;NOMINMAX;USE_CONDVAR;NDEBUG;SNAPPY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -181,7 +183,7 @@
     <ClCompile Include="..\..\leveldb\util\status.cc" />
     <ClCompile Include="..\..\leveldb\util\testharness.cc" />
     <ClCompile Include="..\..\leveldb\util\testutil.cc" />
-    <ClCompile Include="..\..\leveldb_windows_port\win32_posix\dirent_win32.c" />
+    <ClCompile Include="..\..\leveldb_windows_port\win32_posix\dirent_win32.cpp" />
     <ClCompile Include="..\..\leveldb_windows_port\win32_posix\mman.cpp" />
     <ClCompile Include="..\..\leveldb_windows_port\win32_posix\pthread_win32port.cpp" />
     <ClCompile Include="..\..\leveldb_windows_port\win32_posix\win32_posix.cc" />

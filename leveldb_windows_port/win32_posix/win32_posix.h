@@ -89,8 +89,8 @@ int fsync_win32(int fd);
 int fread_unlockd(void *_DstBuf, size_t _EleSize, size_t _Count, FILE *_file);
 
 
-char *posix_path_to_win32(const char *posix_path);
-char *posix_path_to_win32_full(const char *posix_path);
+wchar_t *posix_path_to_win32(const char *posix_path);
+wchar_t *posix_path_to_win32_full(const char *posix_path);
 
 #define va_copy(d,s) ((d) = (s))
 

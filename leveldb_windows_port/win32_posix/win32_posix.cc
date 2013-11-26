@@ -92,9 +92,9 @@ int ftruncate_win32(int fd, off_t length)
 
 int access_win32(const char *path, int mode)
 {
-	char *win32_path = posix_path_to_win32(path);
+	wchar_t *win32_path = posix_path_to_win32(path);
 
-	int i = _access(win32_path, mode);
+	int i = _waccess(win32_path, mode);
 	free(win32_path);
 	
 	return i;
@@ -102,9 +102,9 @@ int access_win32(const char *path, int mode)
 
 int unlink_win32(const char *path)
 {
-	char *win32_path = posix_path_to_win32(path);
+	wchar_t *win32_path = posix_path_to_win32(path);
 
-	int i = _unlink(win32_path);
+	int i = _wunlink(win32_path);
 	free(win32_path);
 
 	return i;
@@ -112,9 +112,9 @@ int unlink_win32(const char *path)
 
 int open_win32(const char *path, int flag, int pmode)
 {
-	char *win32_path = posix_path_to_win32(path);
+	wchar_t *win32_path = posix_path_to_win32(path);
 
-	int i = _open(win32_path, flag | _O_BINARY, pmode);
+	int i = _wopen(win32_path, flag | _O_BINARY, pmode);
 	free(win32_path);
 		
 	return i;
@@ -140,14 +140,14 @@ int open_win32(const char *path, int flag)
 		//if(flag && _O_TRUNC) opening |= TRUNCATE_EXISTING;
 	}
 
-	char *win32_path = posix_path_to_win32(path);
-	if(GetFileAttributes(win32_path)==FILE_ATTRIBUTE_DIRECTORY) 
+	wchar_t *win32_path = posix_path_to_win32(path);
+	if(GetFileAttributesW(win32_path)==FILE_ATTRIBUTE_DIRECTORY) 
 	{
 		attributes |= FILE_FLAG_BACKUP_SEMANTICS;
 		desired_access |= GENERIC_WRITE; //grant additional write access to folders, can't flush the folder without it
 	}
 
-	fHandle = CreateFile(win32_path, desired_access, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, disposition, attributes, NULL);
+	fHandle = CreateFileW(win32_path, desired_access, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, disposition, attributes, NULL);
 	free(win32_path);
 
 	if(fHandle!=INVALID_HANDLE_VALUE)
@@ -172,16 +172,16 @@ int mkdir_win32(const char *path, int mode)
 	mkdir can only create a single directory per call. If there are several of them to create in the indicated path, you have to cut down the path name to every single unmade path.
 	***/
 
-	char *rm_path = posix_path_to_win32(path);
-	int l = strlen(rm_path), s=0, i=0;
+	wchar_t *rm_path = posix_path_to_win32(path);
+	int l = wcslen(rm_path), s=0, i=0;
 
 	while(s<l)
 	{
-		if(rm_path[s]=='/')
+		if(rm_path[s]==L'/')
 		{
 			rm_path[s]=0;
-			i = _mkdir(rm_path);
-			rm_path[s] = '/';
+			i = _wmkdir(rm_path);
+			rm_path[s] = L'/';
 			
 			if(i==-1) 
 			{
@@ -196,7 +196,7 @@ int mkdir_win32(const char *path, int mode)
 		s++;
 	}
 
-	i = _mkdir(rm_path); //last mkdir in case the path name doesn't end with a '/'
+	i = _wmkdir(rm_path); //last mkdir in case the path name doesn't end with a '/'
 
 	free(rm_path);
 		
@@ -219,7 +219,7 @@ int mkdir_win32(std::string st_in)
 	return mkdir_win32(ch_in, 0);
 }
 
-int rmdir_resovled(char *win32_path)
+int rmdir_resovled(wchar_t *win32_path)
 {
 	/***This function only takes resolved paths, please go through rmdir_win32 instead
 	
@@ -228,7 +228,7 @@ int rmdir_resovled(char *win32_path)
 	
 	int i=0;
 
-	i = RemoveDirectory(win32_path);
+	i = RemoveDirectoryW(win32_path);
 	if(!i)
 	{
 		DWORD lasterror = GetLastError();
@@ -237,32 +237,32 @@ int rmdir_resovled(char *win32_path)
 			DIR *dempty = opendir(win32_path);
 			if(dempty)
 			{
-				char *filepath = (char*)malloc(MAX_PATH);
-				strcpy(filepath, win32_path);
-				int fpl = strlen(win32_path);
-				if(win32_path[fpl-1]!='/') 
+				wchar_t *filepath = (wchar_t*)malloc(sizeof(wchar_t)*MAX_PATH);
+				wcscpy(filepath, win32_path);
+				int fpl = wcslen(win32_path);
+				if(win32_path[fpl-1]!=L'/') 
 				{
-					filepath[fpl++] = '/';
+					filepath[fpl++] = L'/';
 					filepath[fpl] = 0;
 				}
 
 				dirent *killfile=0;
 				while((killfile = readdir(dempty)))
 				{
-					if(strcmp(killfile->d_name, ".") && strcmp(killfile->d_name, "..")) //skip all . and .. returned by dirent
+					if(wcscmp(killfile->wd_name, L".") && wcscmp(killfile->wd_name, L"..")) //skip all . and .. returned by dirent
 					{
-						strcpy(filepath +fpl, killfile->d_name);
-						if(GetFileAttributes(filepath)==FILE_ATTRIBUTE_DIRECTORY) //check path is a folder
+						wcscpy(filepath +fpl, killfile->wd_name);
+						if(GetFileAttributesW(filepath)==FILE_ATTRIBUTE_DIRECTORY) //check path is a folder
 							rmdir_resovled(filepath); //if it's a folder, call rmdir on it
 						else
-							_unlink(filepath); //else delete the file
+							_wunlink(filepath); //else delete the file
 					}
 				}
 				free(filepath);
 			}
 			closedir(dempty);
 
-			i = RemoveDirectory(win32_path);
+			i = RemoveDirectoryW(win32_path);
 			if(!i)
 			{
 				_set_errno(EBADF);
@@ -288,21 +288,21 @@ int rmdir_win32(const char *path)
 	***/
 	
 	int i=0;
-	char *win32_path = posix_path_to_win32(path);
-	if(win32_path[strlen(win32_path)-1]=='*') //wildcard handling
+	wchar_t *win32_path = posix_path_to_win32(path);
+	if(win32_path[wcslen(win32_path)-1]=='*') //wildcard handling
 	{
 		//get wild card
-		char *wildcard = (char*)malloc(MAX_PATH);
-		memset(wildcard, 0, MAX_PATH);
-		int l = strlen(win32_path), s=l-2; //-2 for the *
+		wchar_t *wildcard = (wchar_t*)malloc(sizeof(wchar_t)*MAX_PATH);
+		memset(wildcard, 0, sizeof(wchar_t)*MAX_PATH);
+		int l = wcslen(win32_path), s=l-2; //-2 for the *
 		int wildcard_length=0;
 
 		while(s)
 		{
-			if(win32_path[s]=='/')
+			if(win32_path[s]==L'/')
 			{
 				wildcard_length = l-1 -s-1;
-				memcpy(wildcard, win32_path +s+1, wildcard_length);
+				memcpy(wildcard, win32_path +s+1, sizeof(wchar_t)*wildcard_length);
 				wildcard[wildcard_length] = 0;
 				
 				win32_path[s+1]=0; //take wildcard away from origin path
@@ -313,10 +313,10 @@ int rmdir_win32(const char *path)
 			s--;
 		}
 
-		char *delpath = (char*)malloc(MAX_PATH);
-		char *checkwc = (char*)malloc(MAX_PATH);
-		strcpy(delpath, win32_path);
-		int dpl = strlen(win32_path);
+		wchar_t *delpath = (wchar_t*)malloc((sizeof(wchar_t)*MAX_PATH));
+		wchar_t *checkwc = (wchar_t*)malloc((sizeof(wchar_t)*MAX_PATH));
+		wcscpy(delpath, win32_path);
+		int dpl = wcslen(win32_path);
 
 		//find all directories in path
 		DIR* dirrm = opendir(win32_path);
@@ -325,16 +325,16 @@ int rmdir_win32(const char *path)
 			dirent *dirp = 0; 
 			while((dirp=readdir(dirrm)))
 			{
-				if(strcmp(dirp->d_name, ".") && strcmp(dirp->d_name, "..")) //skip all . and .. returned by dirent
+				if(wcscmp(dirp->wd_name, L".") && wcscmp(dirp->wd_name, L"..")) //skip all . and .. returned by dirent
 				{
-					strcpy(delpath +dpl, dirp->d_name);
-					if(GetFileAttributes(delpath)==FILE_ATTRIBUTE_DIRECTORY) //check path is a folder
+					wcscpy(delpath +dpl, dirp->wd_name);
+					if(GetFileAttributesW(delpath)==FILE_ATTRIBUTE_DIRECTORY) //check path is a folder
 					{
 						//check path against wildcard
-						strcpy(checkwc, dirp->d_name);
+						wcscpy(checkwc, dirp->wd_name);
 						checkwc[wildcard_length] = 0;
 
-						if(!strcmp(checkwc, wildcard)) //wild card matches
+						if(!wcscmp(checkwc, wildcard)) //wild card matches
 						{
 							i |= rmdir_resovled(delpath);
 						}
@@ -362,13 +362,13 @@ int rmdir_win32(std::string st_in)
 
 int rename_win32(const char *oldname, const char *newname)
 {
-	char *oldname_win32, *newname_win32; 
+	wchar_t *oldname_win32, *newname_win32; 
 
 	oldname_win32 = posix_path_to_win32(oldname);
 	newname_win32 = posix_path_to_win32(newname);
 
 	int o=0;
-	if(!MoveFileEx(oldname_win32, newname_win32, MOVEFILE_REPLACE_EXISTING)) //posix rename replaces existing files
+	if(!MoveFileExW(oldname_win32, newname_win32, MOVEFILE_REPLACE_EXISTING)) //posix rename replaces existing files
 	{
 		DWORD last_error = GetLastError();
 		if(last_error==ERROR_FILE_NOT_FOUND) _set_errno(ENOENT);
@@ -384,9 +384,9 @@ int rename_win32(const char *oldname, const char *newname)
 
 int stat_win32(const char *path, struct stat *Sin)
 {
-	char *path_win32 = posix_path_to_win32(path);
+	wchar_t *path_win32 = posix_path_to_win32(path);
 
-	int i = _stat(path_win32, (struct _stat64i32*)Sin);
+	int i = _wstat(path_win32, (struct _stat64i32*)Sin);
 	free(path_win32);
 
 	return i;
@@ -394,14 +394,14 @@ int stat_win32(const char *path, struct stat *Sin)
 
 FILE* fopen_win32(const char *path, const char *mode)
 {
-	char *mode_win32 = (char*)malloc(5);
-	strcpy(mode_win32, mode);
-	strcat(mode_win32, "b");
+	wchar_t *mode_win32 = (wchar_t*)malloc(10);
+	MultiByteToWideChar(CP_UTF8, 0, mode, -1, mode_win32, 10);
+	wcscat(mode_win32, L"b");
 	
-	char *path_win32 = posix_path_to_win32(path);
+	wchar_t *path_win32 = posix_path_to_win32(path);
 
 	FILE *f;
-	f = _fsopen(path_win32, mode_win32, _SH_DENYNO);
+	f = _wfsopen(path_win32, mode_win32, _SH_DENYNO);
 
 	free(mode_win32);
 	free(path_win32);
@@ -506,7 +506,7 @@ int fcntl_win32(int fd, unsigned int command, flock *f)
 	return -1;
 }
 
-char *posix_path_to_win32(const char *posix_path)
+wchar_t *posix_path_to_win32(const char *posix_path)
 {
 	/*** appends . to the begining of the filename if it starts by a \\ or / 
 	make sure only one type of slash is used on the file name***/
@@ -516,7 +516,7 @@ char *posix_path_to_win32(const char *posix_path)
 	
 	if(posix_path[0]=='\\' || posix_path[0]=='/')
 	{
-		win32_path[0] = '.';
+		win32_path[0] = L'.';
 		strcpy(win32_path +1, posix_path);
 		l++;
 	}
@@ -527,11 +527,15 @@ char *posix_path_to_win32(const char *posix_path)
 		if(win32_path[i]=='\\') 
 			win32_path[i]='/';
 	}
+
+	wchar_t *pathw = (wchar_t*)malloc(sizeof(wchar_t)*(strlen(win32_path)+1));
+	MultiByteToWideChar(CP_UTF8, 0, win32_path, -1, pathw, strlen(win32_path)+1);
+	free(win32_path);
 	
-	return win32_path;
+	return pathw;
 }
 
-char *posix_path_to_win32_full(const char *posix_path)
+wchar_t *posix_path_to_win32_full(const char *posix_path)
 {
 	int i=0;
 	int l=strlen(posix_path) +1;
@@ -554,7 +558,11 @@ char *posix_path_to_win32_full(const char *posix_path)
 		i++;
 	}
 
-	return win32_path;
+	wchar_t *pathw = (wchar_t*)malloc(sizeof(wchar_t)*(strlen(win32_path)+1));
+	MultiByteToWideChar(CP_UTF8, 0, win32_path, -1, pathw, strlen(win32_path)+1);
+	free(win32_path);
+
+	return pathw;
 }
 
 
